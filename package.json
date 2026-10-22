@@ -1,0 +1,17 @@
+{
+  "name": "vibe-knowledge-studio",
+  "version": "0.1.0",
+  "description": "把一个知识点做成「Vibe知识大赏」风格的无旁白短片：代码逐帧绘制、双语字幕、代码合成配乐与事件音",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "demo": "node engine/render.mjs examples/birthday all",
+    "preview": "node engine/render.mjs examples/birthday preview"
+  },
+  "dependencies": {
+    "playwright-core": "^1.47.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

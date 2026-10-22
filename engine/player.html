@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Vibe 预览</title>
+<!-- 开源字体；离线时自动退到系统宋体/苹方 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=block">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;color:#ddd;font:14px "PingFang SC",sans-serif}
+  body{display:flex;align-items:center;justify-content:center}
+  #out{max-width:100vw;max-height:100vh;display:block}
+  #bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:10px 16px;background:rgba(0,0,0,.6)}
+  #bar input{flex:1}
+  #bar button{background:#222;color:#eee;border:1px solid #444;padding:4px 12px;cursor:pointer}
+  .render #bar{display:none}
+</style>
+</head>
+<body>
+<canvas id="out"></canvas>
+<div id="bar"><button id="pp">播放</button><span id="tc">0.0s</span><input id="seek" type="range" min="0" step="0.01" value="0"><span>空格 播放/暂停 · ←→ 跳 1 秒</span></div>
+<audio id="au" preload="auto"></audio>
+<script type="module">
+import { createFilm, loadFonts } from './vibe.js';
+const q = new URLSearchParams(location.search), filmPath = q.get('film');
+if (q.has('render')) document.body.classList.add('render');
+const def = (await import(filmPath)).default;
+const canvas = document.getElementById('out');
+const F = createFilm(def, canvas);
+await loadFonts(F.allText);
+
+// 运动量：当前帧缩到 320×180 灰度，和 0.5 秒前那帧比，亮度变化超过 3/255 的像素占比（0–1）
+// 跟 0.5 秒前比而不是跟上一帧比：慢推、慢漂这种每帧不到一像素的运动也测得出来
+const SW = 320, SH = 180, small = document.createElement('canvas'); small.width = SW; small.height = SH;
+const sx = small.getContext('2d', { willReadFrequently: true }), hist = [];
+function motion() {
+  sx.drawImage(canvas, 0, 0, SW, SH); const d = sx.getImageData(0, 0, SW, SH).data, g = new Uint8Array(SW * SH);
+  for (let i = 0; i < g.length; i++) g[i] = d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114;
+  const back = hist.length >= Math.round(F.meta.fps / 2) ? hist.shift() : hist[0];
+  let n = 0; if (back) for (let i = 0; i < g.length; i++) if (Math.abs(g[i] - back[i]) > 3) n++;
+  hist.push(g); return n / g.length;
+}
+window.VIBE = {
+  meta: F.meta, subs: F.subs, events: F.events,
+  frame(t) { F.renderFrame(t); },
+  frameJpeg(t, qq = .92, withMotion = false) { F.renderFrame(t); return { jpg: canvas.toDataURL('image/jpeg', qq), motion: withMotion ? motion() : 0 }; },
+  framePng(t) { F.renderFrame(t); return canvas.toDataURL('image/png'); },
+};
+window.READY = true;
+
+if (!q.has('render')) {
+  const seek = document.getElementById('seek'), tc = document.getElementById('tc'), pp = document.getElementById('pp'), au = document.getElementById('au');
+  seek.max = F.meta.duration;
+  au.src = new URL('out/audio.wav', new URL(filmPath, location.href)).href;
+  let t = +(q.get('t') ?? 0), playing = false, t0 = 0, w0 = 0;
+  const show = () => { F.renderFrame(t); seek.value = t; tc.textContent = t.toFixed(1) + 's'; };
+  const play = on => {
+    playing = on; pp.textContent = on ? '暂停' : '播放'; t0 = t; w0 = performance.now();
+    if (on) { au.currentTime = t; au.play().catch(() => {}); } else au.pause();
+  };
+  pp.onclick = () => play(!playing);
+  seek.oninput = () => { t = +seek.value; if (playing) play(true); show(); };
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); play(!playing); }
+    if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') { t = Math.max(0, Math.min(F.meta.duration, t + (e.code === 'ArrowRight' ? 1 : -1))); if (playing) play(true); show(); }
+  });
+  (function loop() { if (playing) { t = t0 + (performance.now() - w0) / 1000; if (t >= F.meta.duration) { t = F.meta.duration; play(false); } } show(); requestAnimationFrame(loop); })();
+}
+</script>
+</body>
+</html>
