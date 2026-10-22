@@ -8,7 +8,7 @@ if (!file) { console.error('用法：node engine/beats.mjs <音频文件>'); pro
 const SR = 22050, r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-f', 'f32le', '-ac', '1', '-ar', String(SR), '-'], { maxBuffer: 1 << 30 });
 if (r.status) { console.error(String(r.stderr)); process.exit(1); }
 const x = new Float32Array(r.stdout.buffer, r.stdout.byteOffset, r.stdout.length / 4), dur = x.length / SR;
-const db = v => 20 * Math.log10(Math.max(v, 1e-9));
+const db = v => 20 * Math.log10(Math.max(v, 1e-4));   // 下限 -80dB：数字静音不该算出几百 dB 的"跳变"
 
 // 20ms 一帧的响度
 const H = Math.round(SR * .02), F = [];
