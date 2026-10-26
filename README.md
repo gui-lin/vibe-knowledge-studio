@@ -35,7 +35,7 @@
 需要 Node ≥ 18、ffmpeg、Chrome（或 `npx playwright install chromium`）。
 
 ```bash
-git clone <本仓库地址> ~/.claude/skills/vibe-knowledge-studio
+git clone https://github.com/gui-lin/vibe-knowledge-studio.git ~/.claude/skills/vibe-knowledge-studio
 cd ~/.claude/skills/vibe-knowledge-studio && npm install
 npm run demo        # 渲染示例 → examples/birthday/out/生日悖论.mp4
 ```
