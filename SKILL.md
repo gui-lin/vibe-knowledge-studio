@@ -47,6 +47,7 @@ description: 把一个知识点做成抖音「Vibe知识大赏」风格的无旁
 - **全片 1–2 次全屏大事件**，放在揭晓处；能用场景讲的不用图表
 - 分镜表多一列"观众在做什么"；连续 40 秒只在读和看，就加一个动作
 - 选世界：`night` 夜曲（抽象概念）/ `gilt` 鎏金暗场（编年史）/ `paper` 宣纸水墨（国学、人生，适合竖屏）/ **笔触世界**（哲学、意识、情绪、艺术：流动油画 + 蓝图对切，`engine/brush.js`，示例 `examples/dream-oil/`）。夜曲默认改成纯黑底，不写 `author` 和 `chapters`。见 `references/visual.md`
+- **画面不能只有字**：每段先定"这段是什么画"，再写字幕。纯黑底 + 大字 + 列表的段落连续超过 15 秒就要换成场景
 - 声音：重音对齐揭晓时刻；静音 2–3 秒（全片一次），最好静音本身就在演那句话；响度留出起伏。见 `references/sound.md`
 
 ### 5. 写 film.js
@@ -94,4 +95,5 @@ node engine/render.mjs <影片目录> all
 | `references/narrated.md` | 配音解读模式：带旁白的长片（AI 配音 → 识别对齐 → 分镜生成），以及实战踩坑 |
 | `templates/film.js` | 六段式起步模板（能直接渲染） |
 | `examples/birthday/` | 示例《生日悖论》 |
-| `engine/` | 运行时 `vibe.js`、渲染 `render.mjs`、声音 `audio.mjs`、体检 `qa.mjs`、配乐分析 `beats.mjs` |
+| `examples/dream-oil/` | 示例《笔触世界》：流动笔触、笔触聚字、失焦醒来、蓝图画中画（16 秒） |
+| `engine/` | 运行时 `vibe.js`、笔触工具箱 `brush.js`、渲染 `render.mjs`、声音 `audio.mjs`、体检 `qa.mjs`、配乐分析 `beats.mjs` |

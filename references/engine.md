@@ -84,3 +84,18 @@ node engine/render.mjs <影片目录> all                # 全部 → out/<片�
 node engine/beats.mjs 曲子.mp3                       # 外部配乐的 BPM 和重音点
 ```
 `PORT=8200` 换端口；`CHROME_PATH=…` 指定浏览器。80 秒的示例在 M 系列 Mac 上全流程约 70 秒。
+
+## 笔触工具箱 `engine/brush.js`
+
+```js
+import { strokes, glowDisc, brushText, dreamBlur, grain, blueprint } from '/engine/brush.js';
+```
+
+| 函数 | 签名 | 说明 |
+|---|---|---|
+| `strokes` | `(c, {id, area:[x0,y0,x1,y1], count, colors, len, width, alpha, period, travel, field:{bias, turns, scale, drift, vortices:[{x,y,r,dir,k}]}, clip(x,c), seed})` | 流动笔触层。`id` 必须唯一（按它缓存笔触）；area/涡旋位置用画面比例；`clip` 在 x 上画轮廓路径 |
+| `glowDisc` | `(c, x, y, r, {color, halo, alpha})` | 月亮 / 光点，带光晕 |
+| `brushText` | `(c, str, x, y, {size, k, colors, font, scatter, alpha})` | 笔触聚成的大字，`k` 0→1 从四散聚拢 |
+| `dreamBlur` | `(c, amt, {blur, wash, washAlpha})` | 把已画好的画面虚化褪色泛白，放在场景 draw 最后；字幕不受影响 |
+| `grain` | `(c, amount)` | 胶片颗粒，叠在最上 |
+| `blueprint` | `(c, {bg, line, step, alpha})` | 蓝图底 + 网格 |
